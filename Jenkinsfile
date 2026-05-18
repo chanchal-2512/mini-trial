@@ -40,12 +40,11 @@ pipeline {
         stage('4. Build and Push Docker Image') {
             steps {
                 echo 'Compiling container image and pushing to Docker Hub registry...'
-                // Using your exact credential ID 'docker-hub-credentials'
                 withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                     bat """
                         docker login -u %DOCKER_USER% -p %DOCKER_PASS%
-                        docker build -t YOUR_DOCKERHUB_USERNAME/native-todo-app:latest .
-                        docker push chanchal2512/native-todo-app:latest
+                        docker build -t %DOCKER_USER%/native-todo-app:latest .
+                        docker push %DOCKER_USER%/native-todo-app:latest
                     """
                 }
             }
