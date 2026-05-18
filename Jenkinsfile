@@ -47,7 +47,8 @@ pipeline {
         stage('5. Deploy to Render') {
             steps {
                 echo 'Calling Render webhook endpoint to pull new target deployment branch...'
-                bat 'curl -X POST "%RENDER_HOOK%"'
+                // Added --ssl-no-revoke to bypass the Windows schannel restriction
+                bat 'curl --ssl-no-revoke -X POST "%RENDER_HOOK%"'
             }
         }
     }
