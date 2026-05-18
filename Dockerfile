@@ -1,7 +1,13 @@
 FROM python:3.9-slim
+
+# Create and switch to workspace directory
 WORKDIR /app
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy all project static pages, JSON datastores, and server scripts
 COPY . .
-EXPOSE 5000
+
+# Match the fallback port specified in your server code
+EXPOSE 8000
+
+# Execute the application
 CMD ["python", "server.py"]

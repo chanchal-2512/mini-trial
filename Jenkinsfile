@@ -2,26 +2,26 @@ pipeline {
     agent any
 
     environment {
-        // Render Deploy Hook URL (Keep this secure using Jenkins Credentials)
+        // Safe binding for your automated Render Deploy Webhook
         RENDER_HOOK = credentials('RENDER_DEPLOY_HOOK')
     }
 
     stages {
         stage('1. Fetch Source Code') {
             steps {
-                echo 'Fetching source code from GitHub...'
+                echo 'Pulling source tree configuration from SCM repository...'
                 checkout scm
             }
         }
 
         stage('2. Code Quality Analysis') {
             steps {
-                echo 'Running Code Quality Analysis via SonarQube (SonarCloud)...'
+                echo 'Executing code metrics checks via SonarQube Container...'
                 withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_KEY')]) {
                     bat """
                         docker run --rm -v "%cd%:/usr/src" sonarsource/sonar-scanner-cli \
-                        -Dsonar.projectKey=chanchal-2512_todolist \
-                        -Dsonar.organization=chanchal-2512 \
+                        -Dsonar.projectKey=YOUR_NEW_PROJECT_KEY \
+                        -Dsonar.organization=YOUR_ORGANIZATION_KEY \
                         -Dsonar.sources=. \
                         -Dsonar.host.url=https://sonarcloud.io \
                         -Dsonar.token=%SONAR_KEY%
@@ -32,24 +32,21 @@ pipeline {
 
         stage('3. Vulnerability Scanning') {
             steps {
-                echo 'Scanning dependencies for vulnerabilities with Trivy...'
-                // Scans the workspace directory and outputs results to a text artifact
+                echo 'Running deep dependency filesystem scans via Trivy...'
                 bat 'docker run --rm -v "%cd%:/apps" aquasec/trivy fs /apps > trivy-report.txt'
             }
         }
 
         stage('4. Build Docker Image') {
             steps {
-                echo 'Building local Docker image...'
-                // Verifies the application container builds successfully without errors
-                bat 'docker build -t todo-app:local .'
+                echo 'Compiling local container build to verify image assembly...'
+                bat 'docker build -t native-todo-app:local .'
             }
         }
 
         stage('5. Deploy to Render') {
             steps {
-                echo 'Triggering live deployment on Render...'
-                // Invokes Render's deploy hook URL to pull down the newest repository state
+                echo 'Calling Render webhook endpoint to pull new target deployment branch...'
                 bat 'curl -X POST "%RENDER_HOOK%"'
             }
         }
@@ -57,14 +54,8 @@ pipeline {
 
     post {
         always {
-            echo 'Archiving security scan artifacts...'
+            echo 'Publishing workspace security scan logs...'
             archiveArtifacts artifacts: 'trivy-report.txt', allowEmptyArchive: true
-        }
-        success {
-            echo 'Pipeline executed perfectly!'
-        }
-        failure {
-            echo 'Pipeline failed. Check stage logs above for debugging.'
         }
     }
 }
