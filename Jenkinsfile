@@ -33,7 +33,8 @@ pipeline {
         stage('3. Vulnerability Scanning') {
             steps {
                 echo 'Running deep dependency filesystem scans via Trivy...'
-                bat 'docker run --rm -v "%cd%:/apps" aquasec/trivy fs /apps > trivy-report.txt'
+                bat 'echo %WORKSPACE%'  // temporary debug line
+                bat "docker run --rm -v \"%WORKSPACE%:/apps\" aquasec/trivy fs --timeout 10m /apps > trivy-report.txt"
             }
         }
 
