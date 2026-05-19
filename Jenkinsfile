@@ -37,18 +37,12 @@ pipeline {
             }
         }
 
-        stage('4. Build and Push Docker Image') {
+        stage('4. Build Docker Image') {
             steps {
-                echo 'Compiling container image and pushing to Docker Hub registry...'
-                withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    bat """
-                        docker login -u %DOCKER_USER% -p %DOCKER_PASS%
-                        docker build -t %DOCKER_USER%/native-todo-app:latest .
-                        docker push %DOCKER_USER%/native-todo-app:latest
-                    """
-                }
+                echo 'Compiling container image locally...'
+                bat 'docker build -t native-todo-app:latest .'
             }
-        }
+}
 
         stage('5. Deploy to Render') {
             steps {
